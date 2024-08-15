@@ -14,10 +14,23 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model user{
-  id             Int       @id @default(autoincrement())
-  email          String    @unique
-  passwordHash   String
-  firstname      String
-  lastname       String
+model User {
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  passwordHash String
+  firstname    String
+  lastname     String
+  Post         Post[]
+}
+
+model Post {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  create_at     DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  author_id     Int
+  author        User     @relation(fields: [author_id], references: [id])
+  slug          String   @unique
+  sanitizedHtml String   @unique
 }
