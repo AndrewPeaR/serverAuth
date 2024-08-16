@@ -5,19 +5,13 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-const userDB = {
-  id: 1,
-  email: "test@test.test",
-  password: "123",
-};
-
 passport.serializeUser(function (user, done) {
-  console.log("Сериализация", user);
+  console.log("Сериализация");
   done(null, user.id);
 });
 
 passport.deserializeUser(async function (id, done) {
-  console.log("Десериализация", id);
+  console.log("Десериализация");
   const user = await prisma.user.findUnique({
     where: {
       id: id,

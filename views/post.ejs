@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <article>
+        <h1><%= post.title %></h1>
+        <p>Описание</p>
+        <div>
+            <%- post.sanitizedHtml %>
+        </div>
+        <p>Create at: <%= post.create_at.toLocaleDateString() %></p>
+        <p>Author: <%= post.author.email %></p>
+    </article>
+</body>
+</html>

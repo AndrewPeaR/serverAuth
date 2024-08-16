@@ -1,22 +1,22 @@
+require('dotenv').config()
 const sqlite3 = require('sqlite3')
 const express = require('express')
 const session = require('express-session')
 const sqliteStoreFactory = require('express-session-sqlite').default
 const passport = require('passport')
 const cors = require('cors')
-const { PrismaClient } = require("@prisma/client");
+const router = require('./routes/routes')
 
-const prisma = new PrismaClient();
-const SqliteStore = sqliteStoreFactory(session)
 const app = express()
-const PORT = 3000
+const PORT = process.env.PORT || 3001
 
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
+const SqliteStore = sqliteStoreFactory(session)
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET,
     store: new SqliteStore({
         driver: sqlite3.Database,
         path: './prisma/dev.db',
@@ -33,73 +33,18 @@ app.use(session({
     saveUninitialized: false
 }))
 
-require('./passport-config')
+require('./config/passport-config')
 app.use(passport.initialize())
 app.use(passport.session())
 
 app.get('/', (req, res) => {
-    // console.log(req.session);
-    res.render('index.ejs', {message: 'Hello, world'})
+    if(req.user?.email)
+        res.render('index.ejs', {user: req.user.email})
+    else
+        res.render('index.ejs', {user: 'Авторизуйтесь'})
 })
 
-app.get('/login', (req, res) => {
-    // console.log(req.session);
-    
-    res.render('login.ejs', {message: 'Hello, world'})
-})
-app.get('/register', (req, res) => {
-    // console.log(req.session);
-
-    res.render('register.ejs', {user: {}})
-})
-
-app.post('/register', async (req, res) => {
-    const user = await prisma.user.create({
-        data: {
-            email: req.body.email,
-            passwordHash: req.body.password,
-            firstname: 'Test',
-            lastname: 'Test'
-        }
-    })
-    res.render('register.ejs', {user: user})
-})
-
-app.post('/login', (req, res, next) => {
-    passport.authenticate('local', function(err, user){
-        if(err)
-            return next(err)
-        if(!user)
-            return res.send('Укажите пароль')
-        req.logIn(user, function(err){
-            if(err)
-                return next(err)
-            return res.redirect('/admin')
-        })
-    })(req, res, next)
-})
-
-const authCheck = (req, res, next)=> {
-    if(req.isAuthenticated()){
-        next()
-    } else {
-        console.log('не пущу')
-        return res.redirect('/login')
-    }
-}
-
-app.get('/admin', authCheck, (req, res) => {
-    res.send('Admin page')
-})
-
-app.get('/logout', (req, res) => {
-    console.log("Выход!");
-    req.logout(function(err) {
-        if(err)
-            return next(err)
-        res.redirect('/')
-    })
-})
+app.use('/', router)
 
 app.listen(PORT, () => {
     console.log(`>>> Server started on port: ${PORT}`);
