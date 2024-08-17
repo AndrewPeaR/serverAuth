@@ -6,13 +6,20 @@ const sqliteStoreFactory = require('express-session-sqlite').default
 const passport = require('passport')
 const cors = require('cors')
 const router = require('./routes/routes')
+const path = require('path')
+
 
 const app = express()
 const PORT = process.env.PORT || 3001
 
+app.engine('ejs', require('ejs-mate'))
+app.set('views', path.join(__dirname, 'views'))
+app.set('view-engine', 'ejs')
+
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
+app.use(express.static(path.join(__dirname, 'public')));
 
 const SqliteStore = sqliteStoreFactory(session)
 app.use(session({
@@ -39,9 +46,9 @@ app.use(passport.session())
 
 app.get('/', (req, res) => {
     if(req.user?.email)
-        res.render('index.ejs', {user: req.user.email})
+        res.render('pages/index.ejs', {user: req.user.email})
     else
-        res.render('index.ejs', {user: 'Авторизуйтесь'})
+        res.render('pages/index.ejs', {user: 'Авторизуйтесь'})
 })
 
 app.use('/', router)

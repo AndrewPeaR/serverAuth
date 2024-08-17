@@ -7,7 +7,7 @@ router.post('/register', AuthController.createUser)
 router.post('/login', AuthController.loginUser)
 
 router.get('/login', (req, res) => {
-    res.render('login.ejs')
+    res.render('pages/login.ejs')
 })
 router.get('/register', (req, res) => {
     res.render('register.ejs')
